@@ -1,0 +1,16 @@
+<div class="container mt-4">
+  <h2>Empresas</h2>
+  <button class="btn btn-primary mb-3" routerLink="/empresas/nova">Nova Empresa</button>
+  <table class="table table-bordered table-striped">
+    <thead><tr><th>Nome</th><th>CNPJ</th><th>Email</th><th>Ações</th></tr></thead>
+    <tbody>
+      <tr *ngFor="let item of list">
+        <td>{{ item.name }}</td><td>{{ item.cnpj }}</td><td>{{ item.email }}</td>
+        <td>
+          <button class="btn btn-sm btn-secondary me-2" [routerLink]="['/empresas/editar', item.id]">Editar</button>
+          <button class="btn btn-sm btn-danger" (click)="delete(item.id!)">Excluir</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
