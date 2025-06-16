@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { UsuarioService } from '../../services/usuario.service';
 import { Usuario } from '../../models/usuario.model';
 
 @Component({
@@ -32,6 +32,10 @@ import { Usuario } from '../../models/usuario.model';
           <div class="form-group">
             <label for="telefone">Telefone:</label>
             <input type="tel" id="telefone" name="telefone" [(ngModel)]="usuario.telefone" required class="form-control">
+          </div>
+
+          <div *ngIf="errorMessage" class="alert alert-danger">
+            {{ errorMessage }}
           </div>
 
           <div class="form-actions">
@@ -73,6 +77,17 @@ import { Usuario } from '../../models/usuario.model';
       border: 1px solid #ddd;
       border-radius: 4px;
       font-size: 1rem;
+    }
+    .alert {
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+    }
+    .alert-danger {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
     }
     .form-actions {
       display: flex;
@@ -116,25 +131,23 @@ export class RegistroComponent {
     senha: '',
     telefone: ''
   };
+  errorMessage: string = '';
 
   constructor(
-    private authService: AuthService,
+    private usuarioService: UsuarioService,
     private router: Router
   ) {}
 
   onSubmit(): void {
-    this.authService.register(this.usuario).subscribe({
+    this.errorMessage = '';
+    
+    this.usuarioService.criarUsuario(this.usuario).subscribe({
       next: () => {
-        alert('Conta criada com sucesso! Faça login para continuar.');
         this.router.navigate(['/login']);
       },
       error: (error) => {
         console.error('Erro ao criar conta:', error);
-        if (error.error?.message?.includes('email') && error.error?.message?.includes('já existe')) {
-          alert('Este e-mail já está cadastrado. Por favor, use outro e-mail ou faça login.');
-        } else {
-          alert('Erro ao criar conta. Tente novamente.');
-        }
+        this.errorMessage = 'Erro ao criar conta. Por favor, tente novamente.';
       }
     });
   }

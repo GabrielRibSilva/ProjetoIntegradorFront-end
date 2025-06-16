@@ -1,33 +1,42 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { PontoColeta } from '../models/ponto-coleta.model';
-import { ApiService } from './api.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PontoColetaService {
-  private endpoint = '/pontosDeColeta';
+  private apiUrl = `${environment.apiUrl}/ponto-coleta`;
 
-  constructor(private apiService: ApiService) { }
+  constructor(private http: HttpClient) { }
 
   listarPontosColeta(): Observable<PontoColeta[]> {
-    return this.apiService.get<PontoColeta[]>(this.endpoint);
+    return this.http.get<PontoColeta[]>(this.apiUrl);
   }
 
-  buscarPorId(id: number): Observable<PontoColeta> {
-    return this.apiService.get<PontoColeta>(`${this.endpoint}/${id}`);
+  getPontoColeta(id: number): Observable<PontoColeta> {
+    return this.http.get<PontoColeta>(`${this.apiUrl}/${id}`);
+  }
+
+  buscarPorBairro(bairroId: number): Observable<PontoColeta[]> {
+    return this.http.get<PontoColeta[]>(`${this.apiUrl}/bairro/${bairroId}`);
+  }
+
+  buscarPorResiduo(residuoId: number): Observable<PontoColeta[]> {
+    return this.http.get<PontoColeta[]>(`${this.apiUrl}/residuo/${residuoId}`);
   }
 
   criarPontoColeta(pontoColeta: PontoColeta): Observable<PontoColeta> {
-    return this.apiService.post<PontoColeta>(this.endpoint, pontoColeta);
+    return this.http.post<PontoColeta>(this.apiUrl, pontoColeta);
   }
 
-  editarPontoColeta(pontoColeta: PontoColeta): Observable<PontoColeta> {
-    return this.apiService.put<PontoColeta>(this.endpoint, pontoColeta);
+  atualizarPontoColeta(id: number, pontoColeta: PontoColeta): Observable<PontoColeta> {
+    return this.http.put<PontoColeta>(`${this.apiUrl}/${id}`, pontoColeta);
   }
 
   deletarPontoColeta(id: number): Observable<void> {
-    return this.apiService.delete(`${this.endpoint}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 } 

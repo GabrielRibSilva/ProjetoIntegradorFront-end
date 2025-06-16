@@ -19,7 +19,6 @@ import { AuthService } from '../../services/auth.service';
           <a routerLink="/rota" routerLinkActive="active">Rotas</a>
           <a routerLink="/rua-conexao" routerLinkActive="active">Ruas Conexões</a>
           <a routerLink="/itinerario" routerLinkActive="active">Itinerários</a>
-          <a routerLink="/auditoria" routerLinkActive="active">Auditoria</a>
           <button class="btn-logout" (click)="logout()">Sair</button>
         </div>
       </div>

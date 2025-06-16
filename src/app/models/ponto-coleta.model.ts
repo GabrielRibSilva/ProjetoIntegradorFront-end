@@ -1,12 +1,23 @@
 import { Bairro } from './bairro.model';
 import { Usuario } from './usuario.model';
+import { Residuo } from './trash.model';
 
 export interface PontoColeta {
   id: number;
-  bairro: Bairro | { id: number };
   nome: string;
-  usuario: Usuario | { id: number };
   endereco: string;
-  horarioFuncionamento: string;
-  residuosAceitaveis: string;
+  bairro: {
+    id: number;
+    nome: string;
+  };
+  usuario: {
+    id: number;
+    nome: string;
+    email: string;
+    telefone: string;
+  };
+  residuo: {
+    id: number;
+    tipo: string;
+  };
 } 

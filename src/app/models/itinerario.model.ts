@@ -1,12 +1,22 @@
+import { Usuario } from './trash.model';
 import { Caminhao } from './caminhao.model';
-import { Usuario } from './usuario.model';
 import { Rota } from './rota.model';
+import { Residuo } from './trash.model';
 
 export interface Itinerario {
   id: number;
-  data_execucao: string;
-  tipos_residuo: string;
+  responsavel: Usuario;
   caminhao: Caminhao;
-  usuario: Usuario;
   rota: Rota;
+  dataExecucao: string;
+  residuo: Residuo;
+}
+
+export interface ItinerarioDTO {
+  responsavelId: number;
+  caminhaoId: number;
+  origemId: number;
+  destinoId: number;
+  dataExecucao: string;
+  residuoId: number;
 } 

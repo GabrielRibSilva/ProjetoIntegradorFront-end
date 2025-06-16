@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CaminhaoService } from '../../services/caminhao.service';
+import { ResiduoService } from '../../services/residuo.service';
 import { Caminhao } from '../../models/caminhao.model';
+import { Residuo } from '../../models/trash.model';
 
 @Component({
   selector: 'app-caminhao',
@@ -24,15 +26,17 @@ import { Caminhao } from '../../models/caminhao.model';
         </div>
 
         <div class="form-group">
-          <label for="tipo_residuo">Tipo de Resíduo:</label>
-          <input type="text" id="tipo_residuo" name="tipo_residuo" [(ngModel)]="caminhao.tipo_residuo" required class="form-control">
+          <label for="residuos">Tipos de Resíduos Transportados:</label>
+          <select id="residuos" name="residuos" [(ngModel)]="caminhao.residuosTransportados" multiple class="form-control">
+            <option *ngFor="let r of residuos" [ngValue]="r">{{ r.tipo }}</option>
+          </select>
         </div>
 
         <div class="form-actions">
           <button type="submit" class="btn btn-primary" [disabled]="!caminhaoForm.form.valid">
-            {{ caminhaoEditando ? 'Atualizar' : 'Criar' }} Caminhão
+            {{ caminhao.id ? 'Atualizar' : 'Criar' }} Caminhão
           </button>
-          <button type="button" class="btn btn-secondary" (click)="cancelarEdicao()" *ngIf="caminhaoEditando">
+          <button type="button" class="btn btn-secondary" (click)="limparFormulario()">
             Cancelar
           </button>
         </div>
@@ -40,12 +44,16 @@ import { Caminhao } from '../../models/caminhao.model';
 
       <div class="grid">
         <div *ngFor="let c of caminhoes" class="card">
-          <h3>{{ c.placa }}</h3>
-          <p>Capacidade: {{ c.capacidade_maxima }} kg</p>
-          <p>Tipo de Resíduo: {{ c.tipo_residuo }}</p>
+          <h3>Caminhão #{{ c.id }}</h3>
+          <p><strong>Placa:</strong> {{ c.placa }}</p>
+          <p><strong>Capacidade Máxima:</strong> {{ c.capacidade_maxima }} kg</p>
+          <p><strong>Tipos de Resíduos:</strong></p>
+          <ul>
+            <li *ngFor="let r of c.residuosTransportados">{{ r.tipo }}</li>
+          </ul>
           <div class="card-actions">
             <button class="btn btn-primary" (click)="editarCaminhao(c)">Editar</button>
-            <button class="btn btn-danger" (click)="deletarCaminhao(c.id)">Deletar</button>
+            <button class="btn btn-danger" (click)="deletarCaminhao(c.id)">Excluir</button>
           </div>
         </div>
       </div>
@@ -54,14 +62,19 @@ import { Caminhao } from '../../models/caminhao.model';
   styles: [`
     .container {
       padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
     }
     .form-group {
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
     }
     .form-control {
       width: 100%;
-      padding: 0.5rem;
-      margin-top: 0.25rem;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
     }
     .grid {
       display: grid;
@@ -71,48 +84,84 @@ import { Caminhao } from '../../models/caminhao.model';
     }
     .card {
       border: 1px solid #ddd;
-      padding: 1rem;
-      border-radius: 4px;
+      padding: 1.5rem;
+      border-radius: 8px;
+      background-color: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .card h3 {
+      margin: 0 0 1rem 0;
+      color: #333;
+    }
+    .card p {
+      margin: 0.5rem 0;
+      color: #666;
+    }
+    .card p strong {
+      color: #333;
+    }
+    .card ul {
+      margin: 0.5rem 0;
+      padding-left: 1.5rem;
+    }
+    .card li {
+      color: #666;
+      margin: 0.25rem 0;
     }
     .card-actions {
       display: flex;
-      gap: 0.5rem;
-      margin-top: 1rem;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
     }
     .btn {
-      padding: 0.5rem 1rem;
+      padding: 0.75rem 1.5rem;
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      font-weight: 500;
+      transition: background-color 0.2s;
     }
     .btn-primary {
       background-color: #007bff;
       color: white;
     }
+    .btn-primary:hover {
+      background-color: #0056b3;
+    }
     .btn-secondary {
       background-color: #6c757d;
       color: white;
+    }
+    .btn-secondary:hover {
+      background-color: #5a6268;
     }
     .btn-danger {
       background-color: #dc3545;
       color: white;
     }
+    .btn-danger:hover {
+      background-color: #c82333;
+    }
   `]
 })
 export class CaminhaoComponent implements OnInit {
   caminhoes: Caminhao[] = [];
+  residuos: Residuo[] = [];
   caminhao: Caminhao = {
     id: 0,
     placa: '',
     capacidade_maxima: 0,
-    tipo_residuo: ''
+    residuosTransportados: []
   };
-  caminhaoEditando = false;
 
-  constructor(private caminhaoService: CaminhaoService) {}
+  constructor(
+    private caminhaoService: CaminhaoService,
+    private residuoService: ResiduoService
+  ) {}
 
   ngOnInit(): void {
     this.carregarCaminhoes();
+    this.carregarResiduos();
   }
 
   carregarCaminhoes(): void {
@@ -122,39 +171,40 @@ export class CaminhaoComponent implements OnInit {
       },
       error: (error) => {
         console.error('Erro ao carregar caminhões:', error);
-        alert(error.message || 'Erro ao carregar caminhões. Tente novamente.');
+      }
+    });
+  }
+
+  carregarResiduos(): void {
+    this.residuoService.listarResiduos().subscribe({
+      next: (residuos) => {
+        this.residuos = residuos;
+      },
+      error: (error) => {
+        console.error('Erro ao carregar resíduos:', error);
       }
     });
   }
 
   salvarCaminhao(): void {
-    if (this.caminhaoEditando) {
-      this.caminhaoService.editarCaminhao(this.caminhao).subscribe({
+    if (this.caminhao.id) {
+      this.caminhaoService.atualizarCaminhao(this.caminhao.id, this.caminhao).subscribe({
         next: () => {
           this.carregarCaminhoes();
-          this.cancelarEdicao();
-          alert('Caminhão atualizado com sucesso!');
+          this.limparFormulario();
         },
         error: (error) => {
           console.error('Erro ao atualizar caminhão:', error);
-          alert(error.message || 'Erro ao atualizar caminhão. Tente novamente.');
         }
       });
     } else {
       this.caminhaoService.criarCaminhao(this.caminhao).subscribe({
         next: () => {
           this.carregarCaminhoes();
-          this.caminhao = {
-            id: 0,
-            placa: '',
-            capacidade_maxima: 0,
-            tipo_residuo: ''
-          };
-          alert('Caminhão criado com sucesso!');
+          this.limparFormulario();
         },
         error: (error) => {
           console.error('Erro ao criar caminhão:', error);
-          alert(error.message || 'Erro ao criar caminhão. Tente novamente.');
         }
       });
     }
@@ -162,31 +212,27 @@ export class CaminhaoComponent implements OnInit {
 
   editarCaminhao(caminhao: Caminhao): void {
     this.caminhao = { ...caminhao };
-    this.caminhaoEditando = true;
   }
 
   deletarCaminhao(id: number): void {
-    if (confirm('Tem certeza que deseja deletar este caminhão?')) {
+    if (confirm('Tem certeza que deseja excluir este caminhão?')) {
       this.caminhaoService.deletarCaminhao(id).subscribe({
         next: () => {
           this.carregarCaminhoes();
-          alert('Caminhão deletado com sucesso!');
         },
         error: (error) => {
           console.error('Erro ao deletar caminhão:', error);
-          alert(error.message || 'Erro ao deletar caminhão. Tente novamente.');
         }
       });
     }
   }
 
-  cancelarEdicao(): void {
+  limparFormulario(): void {
     this.caminhao = {
       id: 0,
       placa: '',
       capacidade_maxima: 0,
-      tipo_residuo: ''
+      residuosTransportados: []
     };
-    this.caminhaoEditando = false;
   }
 } 

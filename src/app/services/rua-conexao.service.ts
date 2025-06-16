@@ -4,22 +4,28 @@ import { Observable } from 'rxjs';
 import { RuaConexao } from '../models/rua-conexao.model';
 import { environment } from '../../environments/environment';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class RuaConexaoService {
-  private apiUrl = environment.apiUrl + '/ruasConexoes';
+  private apiUrl = `${environment.apiUrl}/ruas-conexoes`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
-  listarRuasConexao(): Observable<RuaConexao[]> {
+  getRuasConexoes(): Observable<RuaConexao[]> {
     return this.http.get<RuaConexao[]>(this.apiUrl);
   }
 
-  criarRuaConexao(rua: RuaConexao): Observable<RuaConexao> {
-    return this.http.post<RuaConexao>(this.apiUrl, rua);
+  getRuaConexao(id: number): Observable<RuaConexao> {
+    return this.http.get<RuaConexao>(`${this.apiUrl}/${id}`);
   }
 
-  editarRuaConexao(rua: RuaConexao): Observable<RuaConexao> {
-    return this.http.put<RuaConexao>(`${this.apiUrl}/${rua.id}`, rua);
+  criarRuaConexao(ruaConexao: RuaConexao): Observable<RuaConexao> {
+    return this.http.post<RuaConexao>(this.apiUrl, ruaConexao);
+  }
+
+  atualizarRuaConexao(id: number, ruaConexao: RuaConexao): Observable<RuaConexao> {
+    return this.http.put<RuaConexao>(`${this.apiUrl}/${id}`, ruaConexao);
   }
 
   deletarRuaConexao(id: number): Observable<void> {

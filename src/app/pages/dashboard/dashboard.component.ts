@@ -1,27 +1,22 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
-import { AuthService } from './services/auth.service';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
-  selector: 'app-root',
+  selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule],
   template: `
-    <nav class="menu-topo" *ngIf="authService.isLoggedIn()">
-      <button class="btn" (click)="navegarPara('home')">Início</button>
-      <button class="btn" (click)="navegarPara('ponto-coleta')">Pontos de Coleta</button>
-      <button class="btn" (click)="navegarPara('caminhao')">Caminhões</button>
-      <button class="btn" (click)="navegarPara('rota')">Rotas</button>
-      <button class="btn" (click)="navegarPara('itinerario')">Itinerários</button>
-      <button class="btn" (click)="navegarPara('cronograma')">Cronograma</button>
-      <button class="btn" (click)="navegarPara('consulta')">Consultas</button>
+    <nav class="menu-topo">
+      <button class="btn" (click)="navegarPara('dashboard')">Início</button>
       <button class="btn" (click)="navegarPara('residuo')">Resíduos</button>
       <button class="btn btn-danger" (click)="logout()">Sair</button>
     </nav>
-    <main>
-      <router-outlet></router-outlet>
-    </main>
+    <div class="container">
+      <h1>Bem-vindo ao Sistema de Gerenciamento</h1>
+      <p>Selecione uma opção no menu acima para navegar.</p>
+    </div>
   `,
   styles: [`
     .menu-topo {
@@ -56,14 +51,38 @@ import { AuthService } from './services/auth.service';
     .btn-danger:hover {
       background: #c82333;
     }
-    main {
+    .container {
       margin-top: 6rem;
       padding: 2rem;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+    h1 {
+      color: #4CAF50;
+      margin-bottom: 1rem;
+    }
+    p {
+      color: #333;
+      font-size: 1.2rem;
     }
   `]
 })
-export class AppComponent {
-  constructor(public authService: AuthService, public router: Router) {}
+export class DashboardComponent implements OnInit {
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login']);
+    }
+  }
 
   navegarPara(rota: string): void {
     this.router.navigate([`/${rota}`]);

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap, map } from 'rxjs';
 import { Usuario } from '../models/usuario.model';
 import { environment } from '../../environments/environment';
 
@@ -8,33 +8,39 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = `${environment.apiUrl}/usuarios`;
+  private apiUrl = `${environment.apiUrl}/auth`;
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
   public isLoggedIn$ = this.isLoggedInSubject.asObservable();
 
   constructor(private http: HttpClient) {
     const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      this.isLoggedInSubject.next(true);
-    }
+    this.isLoggedInSubject.next(!!savedUser);
   }
 
-  login(email: string, senha: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/login`, { email, senha }).pipe(
-      tap(response => {
-        console.log('Resposta do login:', response);
-        if (response) {
+  login(email: string, senha: string): Observable<boolean> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.post<any>(`${this.apiUrl}/login`, { email, senha }, { headers }).pipe(
+      map(response => {
+        if (response && response.token) {
           localStorage.setItem('currentUser', JSON.stringify(response));
           this.isLoggedInSubject.next(true);
+          return true;
         }
+        return false;
       })
     );
   }
 
   register(usuario: Usuario): Observable<any> {
-    return this.http.post<any>(this.apiUrl, usuario).pipe(
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.post<any>(`${this.apiUrl}/register`, usuario, { headers }).pipe(
       tap(response => {
-        console.log('Resposta do registro:', response);
         if (response) {
           localStorage.setItem('currentUser', JSON.stringify(response));
           this.isLoggedInSubject.next(true);
@@ -48,19 +54,14 @@ export class AuthService {
     this.isLoggedInSubject.next(false);
   }
 
-  isAuthenticated(): boolean {
-    const currentUser = localStorage.getItem('currentUser');
-    console.log('Verificando autenticação:', currentUser);
-    const isAuthenticated = !!currentUser;
-    this.isLoggedInSubject.next(isAuthenticated);
-    return isAuthenticated;
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem('currentUser');
   }
 
-  getToken(): string | null {
-    const currentUser = localStorage.getItem('currentUser');
-    if (currentUser) {
-      const user = JSON.parse(currentUser);
-      return user.token;
+  getCurrentUser(): Usuario | null {
+    const userStr = localStorage.getItem('currentUser');
+    if (userStr) {
+      return JSON.parse(userStr);
     }
     return null;
   }

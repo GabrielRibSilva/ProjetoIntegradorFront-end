@@ -1,37 +1,46 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Caminhao } from '../models/caminhao.model';
-import { ApiService } from './api.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CaminhaoService {
-  private endpoint = '/caminhoes';
+  private apiUrl = `${environment.apiUrl}/caminhao`;
 
-  constructor(private apiService: ApiService) { }
+  constructor(private http: HttpClient) { }
 
   listarCaminhoes(): Observable<Caminhao[]> {
-    return this.apiService.get<Caminhao[]>(this.endpoint);
+    return this.http.get<Caminhao[]>(this.apiUrl);
   }
 
   obterCaminhao(id: number): Observable<Caminhao> {
-    return this.apiService.get<Caminhao>(`${this.endpoint}/${id}`);
+    return this.http.get<Caminhao>(`${this.apiUrl}/${id}`);
   }
 
   buscarPorPlaca(placa: string): Observable<Caminhao> {
-    return this.apiService.get<Caminhao>(`${this.endpoint}/placa/${placa}`);
+    return this.http.get<Caminhao>(`${this.apiUrl}/placa/${placa}`);
+  }
+
+  buscarPorTipoResiduo(residuoId: number): Observable<Caminhao[]> {
+    return this.http.get<Caminhao[]>(`${this.apiUrl}/residuo/${residuoId}`);
   }
 
   criarCaminhao(caminhao: Caminhao): Observable<Caminhao> {
-    return this.apiService.post<Caminhao>(this.endpoint, caminhao);
+    return this.http.post<Caminhao>(this.apiUrl, caminhao);
   }
 
-  editarCaminhao(caminhao: Caminhao): Observable<Caminhao> {
-    return this.apiService.put<Caminhao>(this.endpoint, caminhao);
+  atualizarCaminhao(id: number, caminhao: Caminhao): Observable<Caminhao> {
+    return this.http.put<Caminhao>(`${this.apiUrl}/${id}`, caminhao);
   }
 
   deletarCaminhao(id: number): Observable<void> {
-    return this.apiService.delete(`${this.endpoint}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  getCaminhao(id: number): Observable<Caminhao> {
+    return this.http.get<Caminhao>(`${this.apiUrl}/${id}`);
   }
 } 

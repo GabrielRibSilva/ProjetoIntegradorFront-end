@@ -11,8 +11,7 @@ import { AuthService } from '../../services/auth.service';
   template: `
     <div class="container">
       <div class="login-form">
-        <h1>EcoRoute</h1>
-        <h2>Login</h2>
+        <h1>Login</h1>
         <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
           <div class="form-group">
             <label for="email">Email:</label>
@@ -22,6 +21,10 @@ import { AuthService } from '../../services/auth.service';
           <div class="form-group">
             <label for="senha">Senha:</label>
             <input type="password" id="senha" name="senha" [(ngModel)]="senha" required class="form-control">
+          </div>
+
+          <div *ngIf="errorMessage" class="alert alert-danger">
+            {{ errorMessage }}
           </div>
 
           <div class="form-actions">
@@ -51,11 +54,6 @@ import { AuthService } from '../../services/auth.service';
     h1 {
       color: #4CAF50;
       text-align: center;
-      margin-bottom: 0.5rem;
-    }
-    h2 {
-      color: #333;
-      text-align: center;
       margin-bottom: 2rem;
     }
     .form-group {
@@ -68,6 +66,17 @@ import { AuthService } from '../../services/auth.service';
       border: 1px solid #ddd;
       border-radius: 4px;
       font-size: 1rem;
+    }
+    .alert {
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+    }
+    .alert-danger {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
     }
     .form-actions {
       display: flex;
@@ -106,6 +115,7 @@ import { AuthService } from '../../services/auth.service';
 export class LoginComponent {
   email: string = '';
   senha: string = '';
+  errorMessage: string = '';
 
   constructor(
     private authService: AuthService,
@@ -113,18 +123,23 @@ export class LoginComponent {
   ) {}
 
   onSubmit(): void {
+    this.errorMessage = '';
+    
     this.authService.login(this.email, this.senha).subscribe({
-      next: (response) => {
-        console.log('Login bem-sucedido:', response);
-        if (this.authService.isAuthenticated()) {
-          this.router.navigate(['/home']);
+      next: (success) => {
+        if (success) {
+          this.router.navigate(['/dashboard']);
         } else {
-          alert('Erro ao fazer login. Tente novamente.');
+          this.errorMessage = 'Email ou senha inválidos';
         }
       },
       error: (error) => {
-        console.error('Erro ao fazer login:', error);
-        alert('Erro ao fazer login. Verifique suas credenciais.');
+        console.error('Erro no login:', error);
+        if (error.status === 401) {
+          this.errorMessage = 'Email ou senha inválidos';
+        } else {
+          this.errorMessage = 'Erro ao fazer login. Por favor, tente novamente.';
+        }
       }
     });
   }

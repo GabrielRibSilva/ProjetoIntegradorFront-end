@@ -1,33 +1,34 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ApiService } from './api.service';
+import { environment } from '../../environments/environment';
 import { Usuario } from '../models/usuario.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UsuarioService {
-  private endpoint = '/usuarios';
+  private apiUrl = `${environment.apiUrl}/usuario`;
 
-  constructor(private apiService: ApiService) { }
+  constructor(private http: HttpClient) {}
 
   listarUsuarios(): Observable<Usuario[]> {
-    return this.apiService.get<Usuario[]>(this.endpoint);
+    return this.http.get<Usuario[]>(this.apiUrl);
   }
 
   buscarPorEmail(email: string): Observable<Usuario> {
-    return this.apiService.get<Usuario>(`${this.endpoint}/login/${email}`);
+    return this.http.get<Usuario>(`${this.apiUrl}/login/${email}`);
   }
 
-  criarUsuario(usuario: Usuario): Observable<Usuario> {
-    return this.apiService.post<Usuario>(this.endpoint, usuario);
+  criarUsuario(usuario: Usuario): Observable<void> {
+    return this.http.post<void>(this.apiUrl, usuario);
   }
 
-  editarUsuario(usuario: Usuario): Observable<Usuario> {
-    return this.apiService.put<Usuario>(this.endpoint, usuario);
+  atualizarUsuario(usuario: Usuario): Observable<void> {
+    return this.http.put<void>(this.apiUrl, usuario);
   }
 
-  deletarUsuario(id: number): Observable<any> {
-    return this.apiService.delete(`${this.endpoint}/${id}`);
+  excluirUsuario(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 } 

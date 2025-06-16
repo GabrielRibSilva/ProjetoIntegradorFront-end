@@ -1,26 +1,39 @@
 import { Routes } from '@angular/router';
 import { AuthService } from './services/auth.service';
 import { inject } from '@angular/core';
+import { LoginComponent } from './pages/login/login.component';
+import { RegistroComponent } from './pages/registro/registro.component';
+import { HomeComponent } from './pages/home/home.component';
+import { ResiduoComponent } from './pages/residuo/residuo.component';
 
 export const routes: Routes = [
   {
     path: '',
-    loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent)
+    redirectTo: 'login',
+    pathMatch: 'full'
   },
   {
     path: 'login',
-    loadComponent: () => import('./pages/login/login.component').then(m => m.LoginComponent)
+    component: LoginComponent
   },
   {
     path: 'registro',
-    loadComponent: () => import('./pages/registro/registro.component').then(m => m.RegistroComponent)
+    component: RegistroComponent
   },
   {
     path: 'home',
-    loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent),
+    component: HomeComponent,
     canActivate: [() => {
       const authService = inject(AuthService);
-      return authService.isAuthenticated();
+      return authService.isLoggedIn();
+    }]
+  },
+  {
+    path: 'residuo',
+    component: ResiduoComponent,
+    canActivate: [() => {
+      const authService = inject(AuthService);
+      return authService.isLoggedIn();
     }]
   },
   {
@@ -28,7 +41,7 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/bairro/bairro.component').then(m => m.BairroComponent),
     canActivate: [() => {
       const authService = inject(AuthService);
-      return authService.isAuthenticated();
+      return authService.isLoggedIn();
     }]
   },
   {
@@ -36,7 +49,7 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/caminhao/caminhao.component').then(m => m.CaminhaoComponent),
     canActivate: [() => {
       const authService = inject(AuthService);
-      return authService.isAuthenticated();
+      return authService.isLoggedIn();
     }]
   },
   {
@@ -44,7 +57,7 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/ponto-coleta/ponto-coleta.component').then(m => m.PontoColetaComponent),
     canActivate: [() => {
       const authService = inject(AuthService);
-      return authService.isAuthenticated();
+      return authService.isLoggedIn();
     }]
   },
   {
@@ -52,31 +65,15 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/rota/rota.component').then(m => m.RotaComponent),
     canActivate: [() => {
       const authService = inject(AuthService);
-      return authService.isAuthenticated();
+      return authService.isLoggedIn();
     }]
   },
   {
-    path: 'rua-conexao',
-    loadComponent: () => import('./pages/rua-conexao/rua-conexao.component').then(m => m.RuaConexaoComponent),
+    path: 'usuario',
+    loadComponent: () => import('./pages/usuario/usuario.component').then(m => m.UsuarioComponent),
     canActivate: [() => {
       const authService = inject(AuthService);
-      return authService.isAuthenticated();
-    }]
-  },
-  {
-    path: 'itinerario',
-    loadComponent: () => import('./pages/itinerario/itinerario.component').then(m => m.ItinerarioComponent),
-    canActivate: [() => {
-      const authService = inject(AuthService);
-      return authService.isAuthenticated();
-    }]
-  },
-  {
-    path: 'auditoria',
-    loadComponent: () => import('./pages/auditoria/auditoria.component').then(m => m.AuditoriaComponent),
-    canActivate: [() => {
-      const authService = inject(AuthService);
-      return authService.isAuthenticated();
+      return authService.isLoggedIn();
     }]
   },
   {
